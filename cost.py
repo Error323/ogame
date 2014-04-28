@@ -40,57 +40,63 @@ def get_configuration():
 
   return parser.parse_args()
 
+
+def print_actions(actions, num_units, config):
+  print "\n  Build %d '%s' (ratio %s)" % (num_units, config.unit, ':'.join(config.ratios))
+  for a in actions:
+    print "    Convert %dK %s to %s" % (a[0]/1000, RES_STR[a[1]], RES_STR[a[2]])
+  print ""
+  
+
+def get_units_per_res(resources, cost):
+  """Compute number of units available per resource"""
+  num_units = []
+  for i,j in enumerate(resources):
+    if cost[i] > 0.0:
+      num_units.append(int(j / cost[i]))
+
+  return num_units
+
+
+def convert_res(from_index, to_index, resource, ratios):
+  return (ratios[from_index] / ratios[to_index]) * resource
+    
+
+def maximize(from_index, unit_cost, resources, ratios):
+  unit_list = get_units_per_res(resources, unit_cost)
+  best = min(unit_list)
+
+  while True:
+    i, num = min(enumerate(unit_list), key=operator.itemgetter(1))
+
+    if unit_list.count(num) == len(unit_list):
+      break
+
+    if num >= best:
+      best = num
+    else:
+      break
+
+    step_size = convert_res(from_index, i, unit_cost[i], ratios)
+    resources[from_index] -= step_size
+    resources[i] += unit_cost[i]
+    unit_list = get_units_per_res(resources, unit_cost)
+    print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
+
+  return best
+
+
 if __name__ == "__main__":
-  # Get commandline config
   config = get_configuration()
 
   res = map(float, config.res)
   unit_cost = UNITS[config.unit]
   ratios = map(float, config.ratios)
   
-  num_units = [0, 0, 0]
-  for i in range(0, 3):
-    num_units[i] = int(res[i]/unit_cost[i])
+  num_units = get_units_per_res(res, unit_cost)
+  from_index, _ = max(enumerate(num_units), key=operator.itemgetter(1))
   start_res = copy.deepcopy(res)
-
-  max_i, max_v = max(enumerate(num_units), key=operator.itemgetter(1))
-  min_i, min_v = min(enumerate(num_units), key=operator.itemgetter(1))
-
-  if config.from_res == None:
-    config.from_res = max_i
-  else:
-    max_i = RESOURCES.index(config.from_res)
-    max_v = int(res[max_i]/unit_cost[max_i])
-
-  while True:
-    res_to = unit_cost[min_i] - (int(res[min_i]) % unit_cost[min_i])
-    res_from = (ratios[max_i]/ratios[min_i]) * res_to
-
-    res[min_i] += res_to
-    res[max_i] -= res_from
-    
-    for i in range(0, 3):
-      num_units[i] = int(res[i]/unit_cost[i])
-    max_v = num_units[max_i]
-
-    if (res[max_i] - min(num_units)*unit_cost[max_i] < unit_cost[max_i]):
-      if (max_v < min_v):
-        res[min_i] -= res_to
-        res[max_i] += res_from
-        
-        for i in range(0, 3):
-          num_units[i] = int(res[i]/unit_cost[i])
-      break
-
-    min_i, min_v = min(enumerate(num_units), key=operator.itemgetter(1))
-    
-  num_buildable = min(num_units)
-  print num_units
-  print "\nBuild %d %s as follows (ratio %s)" % (num_buildable, config.unit, ':'.join(config.ratios))
-  for i in range(0, 3):
-    print "   %dK %s (%dK)" % (num_buildable*unit_cost[i]/1000, RES_STR[i], res[i]/1000)
-
-  others = [i for i in range(0,3) if i != max_i]
-  r1 = (num_buildable*unit_cost[others[0]] - start_res[others[0]]) / 1000
-  r2 = (num_buildable*unit_cost[others[1]] - start_res[others[1]]) / 1000
-  print "\nConvert %s to %dK %s and %dK %s\n" % (RES_STR[max_i], r1, RES_STR[others[0]], r2, RES_STR[others[1]])
+  best = maximize(from_index, unit_cost, start_res, ratios)
+  res_indices = [i for i in range(0, 3) if i != from_index]
+  actions = [(best*unit_cost[i]-res[i], from_index, i) for i in res_indices]
+  print_actions(actions, best, config)

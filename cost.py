@@ -42,9 +42,14 @@ def get_configuration():
 
 
 def print_actions(actions, num_units, config):
+  """Pretty print the actions to take"""
+  if num_units == 0:
+    print "\n  Not enough resources\n"
+    return
+
   print "\n  Build %d '%s' (ratio %s)" % (num_units, config.unit, ':'.join(config.ratios))
   for a in actions:
-    print "    Convert %dK %s to %s" % (a[0]/1000, RES_STR[a[1]], RES_STR[a[2]])
+    print "    Convert %s to %dK %s" % (RES_STR[a[1]], a[0]/1000, RES_STR[a[2]])
   print ""
   
 
@@ -52,29 +57,31 @@ def get_units_per_res(resources, cost):
   """Compute number of units available per resource"""
   num_units = []
   for i,j in enumerate(resources):
-    if cost[i] > 0.0:
+    if i < len(cost) and cost[i] > 0.0:
       num_units.append(int(j / cost[i]))
 
   return num_units
 
 
 def convert_res(from_index, to_index, resource, ratios):
+  """Convert a resource from a to b using the proper ratios"""
   return (ratios[from_index] / ratios[to_index]) * resource
     
 
 def maximize(from_index, unit_cost, resources, ratios):
+  """Maximize the unitcount given a resource to convert from"""
   unit_list = get_units_per_res(resources, unit_cost)
   best = min(unit_list)
 
   while True:
     i, num = min(enumerate(unit_list), key=operator.itemgetter(1))
 
-    if unit_list.count(num) == len(unit_list):
-      break
-
     if num >= best:
       best = num
     else:
+      break
+
+    if unit_list.count(num) == len(unit_list):
       break
 
     step_size = convert_res(from_index, i, unit_cost[i], ratios)
@@ -94,9 +101,25 @@ if __name__ == "__main__":
   ratios = map(float, config.ratios)
   
   num_units = get_units_per_res(res, unit_cost)
-  from_index, _ = max(enumerate(num_units), key=operator.itemgetter(1))
-  start_res = copy.deepcopy(res)
-  best = maximize(from_index, unit_cost, start_res, ratios)
-  res_indices = [i for i in range(0, 3) if i != from_index]
-  actions = [(best*unit_cost[i]-res[i], from_index, i) for i in res_indices]
-  print_actions(actions, best, config)
+  size = len(num_units)
+  if (size == 1):
+    inc, exc = -1, []
+    for i in range(0, 3):
+      if unit_cost[i] > 0.0:
+        inc = i
+      else:
+        exc.append(i)
+    a = convert_res(inc, exc[0], res[exc[0]], ratios)
+    b = convert_res(inc, exc[1], res[exc[1]], ratios)
+    best = (res[inc] + a + b) / unit_cost[inc]
+    actions = [(a, exc[0], inc), (b, exc[1], inc)]
+    print_actions(actions, best, config)
+  elif (size == 2):
+    pass
+  else:
+    from_index, _ = max(enumerate(num_units), key=operator.itemgetter(1))
+    start_res = copy.deepcopy(res)
+    best = maximize(from_index, unit_cost, start_res, ratios)
+    res_indices = [i for i in range(0, 3) if i != from_index]
+    actions = [(best*unit_cost[i]-res[i], from_index, i) for i in res_indices]
+    print_actions(actions, best, config)

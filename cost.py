@@ -81,14 +81,14 @@ def maximize(from_index, unit_cost, resources, ratios):
     else:
       break
 
-    if unit_list.count(num) == len(unit_list):
+    if unit_list.count(num) == len(unit_list) or i == from_index:
       break
 
     step_size = convert_res(from_index, i, unit_cost[i], ratios)
     resources[from_index] -= step_size
     resources[i] += unit_cost[i]
     unit_list = get_units_per_res(resources, unit_cost)
-    print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
+    #print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
 
   return best
 

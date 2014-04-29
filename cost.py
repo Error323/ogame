@@ -88,7 +88,7 @@ def maximize2(includes, unit_cost, resources, ratios):
     resources[includes[j]] -= step_size
     resources[includes[i]] += unit_cost[includes[i]]
     unit_list = get_units_per_res(resources, unit_cost)
-    print "%s -> %s\t%s : %s" % (RESOURCES[includes[j]], RESOURCES[includes[i]], unit_list, resources)
+    #print "%s -> %s\t%s : %s" % (RESOURCES[includes[j]], RESOURCES[includes[i]], unit_list, resources)
 
   return best
     

@@ -136,7 +136,7 @@ def maximize(from_index, unit_cost, resources, ratios):
     resources[from_index] -= step_size
     resources[i] += unit_cost[i]
     unit_list = get_units_per_res(resources, unit_cost)
-    print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
+    #print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
 
   return best
 
@@ -185,7 +185,6 @@ if __name__ == "__main__":
 
     # 3. max unitcount of those
     actions = []
-    best = -1
     if (a > b):
       actions.append((ac, inc[i], inc[j]))
       best = a

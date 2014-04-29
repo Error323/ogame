@@ -136,7 +136,7 @@ def maximize(from_index, unit_cost, resources, ratios):
     resources[from_index] -= step_size
     resources[i] += unit_cost[i]
     unit_list = get_units_per_res(resources, unit_cost)
-    #print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
+    print "%s -> %s\t%s : %s" % (RESOURCES[from_index], RESOURCES[i], unit_list, resources)
 
   return best
 
@@ -175,13 +175,13 @@ if __name__ == "__main__":
     j = 1 - i
     start_res = copy.deepcopy(res)
     a = maximize2(inc, unit_cost, start_res, ratios)
-    ac = start_res[inc[j]] - res[inc[j]]
+    ac = a*unit_cost[inc[j]] - res[inc[j]]
 
     # 2. convert unused resource to one or both used resources
     start_res = copy.deepcopy(res)
     b = maximize3(exc, inc, unit_cost, start_res, ratios)
-    bc1 = start_res[inc[i]] - res[inc[i]]
-    bc2 = start_res[inc[j]] - res[inc[j]]
+    bc1 = b*unit_cost[inc[i]] - res[inc[i]]
+    bc2 = b*unit_cost[inc[j]] - res[inc[j]]
 
     # 3. max unitcount of those
     actions = []
@@ -197,7 +197,8 @@ if __name__ == "__main__":
       
   else:
     from_index, _ = max(enumerate(num_units), key=operator.itemgetter(1))
-    best = maximize(from_index, unit_cost, res, ratios)
+    start_res = copy.deepcopy(res)
+    best = maximize(from_index, unit_cost, start_res, ratios)
     res_indices = [i for i in range(0, 3) if i != from_index]
     actions = [(best*unit_cost[i]-res[i], from_index, i) for i in res_indices]
     print_actions(actions, best, config)

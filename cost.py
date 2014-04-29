@@ -18,7 +18,7 @@ UNITS = {
   'cs':[1.0e4, 2.0e4, 1.0e4], # colony ship
   're':[1.0e4, 6.0e3, 2.0e3], # recycler
   'es':[  0e0, 1.0e3,   0e0], # espionage probe
-  'ss':[  0e0, 1.0e3, 0.5e3]  # solar satellite
+  'ss':[  0e0, 2.0e3, 0.5e3]  # solar satellite
 }
 
 RES_STR = ['metal', 'crystal', 'deuterium']
@@ -66,6 +66,55 @@ def convert_res(from_index, to_index, resource, ratios):
   """Convert a resource from a to b using the proper ratios"""
   return (ratios[from_index] / ratios[to_index]) * resource
     
+
+def maximize2(includes, unit_cost, resources, ratios):
+  """Maximize the unitcount given a resource to convert from and convert to"""
+  unit_list = get_units_per_res(resources, unit_cost)
+  best = min(unit_list)
+
+  while True:
+    i, num = min(enumerate(unit_list), key=operator.itemgetter(1))
+    j, _ = max(enumerate(unit_list), key=operator.itemgetter(1))
+
+    if num >= best:
+      best = num
+    else:
+      break
+
+    if i == j:
+      break
+
+    step_size = convert_res(includes[j], includes[i], unit_cost[includes[i]], ratios)
+    resources[includes[j]] -= step_size
+    resources[includes[i]] += unit_cost[includes[i]]
+    unit_list = get_units_per_res(resources, unit_cost)
+    print "%s -> %s\t%s : %s" % (RESOURCES[includes[j]], RESOURCES[includes[i]], unit_list, resources)
+
+  return best
+    
+def maximize3(exc, inc, unit_cost, resources, ratios):
+  """Maximize the unitcount given a resource to convert from and convert to"""
+  unit_list = get_units_per_res(resources, unit_cost)
+  best = min(unit_list)
+
+  while True:
+    i, num = min(enumerate(unit_list), key=operator.itemgetter(1))
+
+    if num >= best:
+      best = num
+
+    step_size = convert_res(exc, inc[i], unit_cost[inc[i]], ratios)
+
+    if resources[exc] < step_size:
+      break
+
+    resources[exc] -= step_size
+    resources[inc[i]] += unit_cost[inc[i]]
+    unit_list = get_units_per_res(resources, unit_cost)
+    #print "%s -> %s\t%s : %s" % (RESOURCES[exc], RESOURCES[inc[i]], unit_list, resources)
+
+  return best
+  
 
 def maximize(from_index, unit_cost, resources, ratios):
   """Maximize the unitcount given a resource to convert from"""
@@ -116,14 +165,39 @@ if __name__ == "__main__":
   elif (size == 2):
     # 1. convert used resource that has highest number of units to other used
     # resource
+    inc, exc = [], -1
+    for i in range(0, 3):
+      if unit_cost[i] > 0.0:
+        inc.append(i)
+      else:
+        exc = i
+    i, _ = max(enumerate(num_units), key=operator.itemgetter(1))
+    j = 1 - i
+    start_res = copy.deepcopy(res)
+    a = maximize2(inc, unit_cost, start_res, ratios)
+    ac = start_res[inc[j]] - res[inc[j]]
 
     # 2. convert unused resource to one or both used resources
+    start_res = copy.deepcopy(res)
+    b = maximize3(exc, inc, unit_cost, start_res, ratios)
+    bc1 = start_res[inc[i]] - res[inc[i]]
+    bc2 = start_res[inc[j]] - res[inc[j]]
 
     # 3. max unitcount of those
+    actions = []
+    best = -1
+    if (a > b):
+      actions.append((ac, inc[i], inc[j]))
+      best = a
+    else:
+      actions.append((bc1, exc, inc[i]))
+      actions.append((bc2, exc, inc[j]))
+      best = b
+    print_actions(actions, best, config)
+      
   else:
     from_index, _ = max(enumerate(num_units), key=operator.itemgetter(1))
-    start_res = copy.deepcopy(res)
-    best = maximize(from_index, unit_cost, start_res, ratios)
+    best = maximize(from_index, unit_cost, res, ratios)
     res_indices = [i for i in range(0, 3) if i != from_index]
     actions = [(best*unit_cost[i]-res[i], from_index, i) for i in res_indices]
     print_actions(actions, best, config)

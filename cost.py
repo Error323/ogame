@@ -35,8 +35,6 @@ def get_configuration():
     required=True, metavar=tuple(RESOURCES), help="resources in stock")
   parser.add_argument("--ratios", type=lambda x: x.split(':'),
     default="3:2:1", help="trading ratios m:c:d (default %(default)s)")
-  parser.add_argument("--from-res", type=str, choices=RESOURCES,
-    help="convert from metal, crystal or deuterium")
 
   return parser.parse_args()
 
@@ -49,7 +47,8 @@ def print_actions(actions, num_units, config):
 
   print "\n  Build %d '%s' (ratio %s)" % (num_units, config.unit, ':'.join(config.ratios))
   for a in actions:
-    print "    Convert %s to %dK %s" % (RES_STR[a[1]], a[0]/1000, RES_STR[a[2]])
+    if a[0] > 0:
+      print "    Convert %s to %dK %s" % (RES_STR[a[1]], a[0]/1000, RES_STR[a[2]])
   print ""
   
 
@@ -115,7 +114,12 @@ if __name__ == "__main__":
     actions = [(a, exc[0], inc), (b, exc[1], inc)]
     print_actions(actions, best, config)
   elif (size == 2):
-    pass
+    # 1. convert used resource that has highest number of units to other used
+    # resource
+
+    # 2. convert unused resource to one or both used resources
+
+    # 3. max unitcount of those
   else:
     from_index, _ = max(enumerate(num_units), key=operator.itemgetter(1))
     start_res = copy.deepcopy(res)

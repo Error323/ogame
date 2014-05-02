@@ -92,6 +92,7 @@ def maximize2(includes, unit_cost, resources, ratios):
 
   return best
     
+
 def maximize3(exc, inc, unit_cost, resources, ratios):
   """Maximize the unitcount given a resource to convert from and convert to"""
   unit_list = get_units_per_res(resources, unit_cost)
@@ -162,6 +163,7 @@ if __name__ == "__main__":
     best = (res[inc] + a + b) / unit_cost[inc]
     actions = [(a, exc[0], inc), (b, exc[1], inc)]
     print_actions(actions, best, config)
+
   elif (size == 2):
     # 1. convert used resource that has highest number of units to other used
     # resource

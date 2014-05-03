@@ -55,9 +55,8 @@ def simulate(attackers, defenders):
   at_lost = [0.0, 0.0, 0.0]
   df_lost = [0.0, 0.0, 0.0]
 
+  print "%d: %d, %d" % (0, len(attackers), len(defenders))
   for r in range(6):
-    print "%d: %d, %d" % (r+1, len(attackers), len(defenders))
-    
     for a in attackers:
       attack(a, defenders)
 
@@ -85,10 +84,10 @@ def simulate(attackers, defenders):
     for d in defenders:
       restore(d)
 
+    print "%d: %d, %d" % (r+1, len(attackers), len(defenders))
     if len(attackers) == 0 or len(defenders) == 0:
       break
 
-  print "%d: %d, %d" % (r+1, len(attackers), len(defenders))
   print at_lost,df_lost
 
 
@@ -98,12 +97,10 @@ if __name__ == "__main__":
   attackers = []
   defenders = []
   for ut in config.unit_attacker:
-    print UNITS[ut[0]].shield
     for u in range(int(ut[1])):
       attackers.append(copy.deepcopy(UNITS[ut[0]]))
 
   for ut in config.unit_defender:
-    print UNITS[ut[0]].shield
     for u in range(int(ut[1])):
       defenders.append(copy.deepcopy(UNITS[ut[0]]))
 

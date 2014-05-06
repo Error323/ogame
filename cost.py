@@ -3,23 +3,7 @@
 import argparse
 import operator
 import copy
-
-UNITS = {
-  'lf':[3.0e3, 1.0e3,   0e0], # light fighter
-  'hf':[6.0e3, 4.0e3,   0e0], # heavy fighter
-  'cr':[2.0e4, 7.0e3, 2.0e3], # cruiser
-  'bs':[4.5e4, 1.5e4,   0e0], # battleship
-  'bc':[3.0e4, 4.0e4, 1.5e4], # battlecruiser
-  'bo':[5.0e4, 2.5e4, 1.5e4], # bomber
-  'ds':[6.0e4, 5.0e4, 1.5e4], # destroyer
-  'dt':[5.0e6, 4.0e6, 1.0e6], # deathstar
-  'sc':[2.0e3, 2.0e3,   0e0], # small cargo
-  'lc':[6.0e3, 6.0e3,   0e0], # large cargo
-  'cs':[1.0e4, 2.0e4, 1.0e4], # colony ship
-  're':[1.0e4, 6.0e3, 2.0e3], # recycler
-  'es':[  0e0, 1.0e3,   0e0], # espionage probe
-  'ss':[  0e0, 2.0e3, 0.5e3]  # solar satellite
-}
+from unit import *
 
 RES_STR = ['metal', 'crystal', 'deuterium']
 RESOURCES = [i[0] for i in RES_STR]
@@ -45,7 +29,7 @@ def print_actions(actions, num_units, config):
     print "\n  Not enough resources\n"
     return
 
-  print "\n  Build %d '%s' (ratio %s)" % (num_units, config.unit, ':'.join(config.ratios))
+  print "\n  Build %d '%s' (ratio %s)" % (num_units, UNITS[config.unit].name, ':'.join(config.ratios))
   for a in actions:
     if a[0] > 0:
       print "    Convert %s to %dK %s" % (RES_STR[a[1]], a[0]/1000, RES_STR[a[2]])
@@ -146,7 +130,7 @@ if __name__ == "__main__":
   config = get_configuration()
 
   res = map(float, config.res)
-  unit_cost = UNITS[config.unit]
+  unit_cost = UNITS[config.unit].cost
   ratios = map(float, config.ratios)
   
   num_units = get_units_per_res(res, unit_cost)

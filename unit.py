@@ -9,12 +9,23 @@ class Unit:
     self.name = name
     self.shortname = shortname
     self.metal, self.crystal, self.deuterium = cost
-    self.attack, self.init_shield = combat
-    self.shield = self.init_shield
-    self.init_hp = (self.metal + self.crystal) / 10.0
-    self.hp = self.init_hp
+    self.attack, self.shield = combat
+    self.init_shield = self.shield
+    self.hull = (self.metal + self.crystal) / 10.0
+    self.init_hull = self.hull
     self.rfto = {}
     self.rffrom = {}
+
+  @property
+  def cost(self):
+    return [self.metal, self.crystal, self.deuterium]
+
+  def setcombat(self, w, s, a):
+    self.hull = (1.0 + a/10.0) * ((self.metal + self.crystal) / 10.0)
+    self.init_hull = self.hull
+    self.attack = self.attack * (1.0 + 0.1*w)
+    self.shield = self.shield * (1.0 + 0.1*s)
+    self.init_shield = self.shield
 
   def __repr__(self):
     return self.shortname
@@ -24,7 +35,7 @@ class Unit:
     s += "  cost:   %sm %sc %sd\n" % (locale.format("%d", self.metal, grouping=True),
                                       locale.format("%d", self.crystal, grouping=True),
                                       locale.format("%d", self.deuterium, grouping=True))
-    s += "  hp:     %s\n" % (locale.format("%d", self.hp, grouping=True))
+    s += "  hull:   %s\n" % (locale.format("%d", self.hull, grouping=True))
     s += "  shield: %s\n" % (locale.format("%d", self.shield, grouping=True))
     s += "  attack: %s\n" % (locale.format("%d", self.attack, grouping=True))
     s += "  rf frm: %s\n" % (self.rffrom)

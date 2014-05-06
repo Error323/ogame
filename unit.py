@@ -27,6 +27,13 @@ class Unit:
     self.shield = self.shield * (1.0 + 0.1*s)
     self.init_shield = self.shield
 
+  def rapidfire(self, t):
+    if self.rfto.has_key(t.shortname):
+      r = self.rfto[t.shortname]
+      return (r - 1.0) / r
+    else:
+      return 0
+
   def __repr__(self):
     return self.shortname
     

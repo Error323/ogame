@@ -12,11 +12,11 @@ def get_configuration():
   parser = argparse.ArgumentParser(description='Simulate an ogame battle')
 
   parser.add_argument("--combat-attacker", type=lambda x: x.split(' ')[0], nargs=3,
-    required=False, default=('0','0','0'), metavar=('w','s','a'), 
-    help="attacker combat research (weapons, shielding, armor)")
+    required=False, default=('0','0','0'), metavar=('w','s','h'), 
+    help="attacker combat research (weapons, shielding, hull)")
   parser.add_argument("--combat-defender", type=lambda x: x.split(' ')[0], nargs=3,
-    required=False, default=('0','0','0'), metavar=('w','s','a'), 
-    help="defender combat research (weapons, shielding, armor)")
+    required=False, default=('0','0','0'), metavar=('w','s','h'), 
+    help="defender combat research (weapons, shielding, hull)")
   parser.add_argument("--unit-attacker", type=lambda x: x.split(':'), nargs="+",
     required=True, metavar=('u'), help="define a unit: <name>:<amount>") 
   parser.add_argument("--unit-defender", type=lambda x: x.split(':'), nargs="+",
@@ -55,43 +55,24 @@ def restore(attacker):
   attacker.shield = attacker.init_shield
 
 def simulate(attackers, defenders):
-  loss_a = {}
-  loss_d = {}
-
-  print "%d: %d, %d" % (0, len(attackers), len(defenders))
+  #print "%d: %d, %d" % (0, len(attackers), len(defenders))
   for r in range(6):
     for a in attackers:
+      restore(a)
       attack(a, defenders)
 
     for d in defenders:
+      restore(d)
       attack(d, attackers)
-
-    for a in attackers:
-      if a.hull <= 0.0:
-        if not loss_a.has_key(a.shortname):
-          loss_a[a.shortname] = 0
-        loss_a[a.shortname] += 1
-
-    for d in defenders:
-      if d.hull <= 0.0:
-        if not loss_d.has_key(d.shortname):
-          loss_d[d.shortname] = 0
-        loss_d[d.shortname] += 1
 
     attackers = filter(lambda x: x.hull > 0.0, attackers)
     defenders = filter(lambda x: x.hull > 0.0, defenders)
 
-    for a in attackers:
-      restore(a)
-
-    for d in defenders:
-      restore(d)
-
-    print "%d: %d, %d" % (r+1, len(attackers), len(defenders))
+    #print "%d: %d, %d" % (r+1, len(attackers), len(defenders))
     if len(attackers) == 0 or len(defenders) == 0:
       break
 
-  return loss_a, loss_d
+  return len(attackers), len(defenders)
 
 
 if __name__ == "__main__":
@@ -102,17 +83,18 @@ if __name__ == "__main__":
 
   w, s, h = map(int, config.combat_attacker)
   for ut in config.unit_attacker:
+    unit = copy.deepcopy(UNITS[ut[0]])
+    unit.setcombat(w, s, h)
     for u in range(int(ut[1])):
-      unit = copy.deepcopy(UNITS[ut[0]])
-      unit.setcombat(w, s, h)
-      attackers.append(unit)
+      attackers.append(copy.deepcopy(unit))
 
   w, s, h = map(int, config.combat_defender)
   for ut in config.unit_defender:
+    unit = copy.deepcopy(UNITS[ut[0]])
+    unit.setcombat(w, s, h)
     for u in range(int(ut[1])):
-      unit = copy.deepcopy(UNITS[ut[0]])
-      unit.setcombat(w, s, h)
-      defenders.append(unit)
+      defenders.append(copy.deepcopy(unit))
 
   for i in range(config.iterations):
-    simulate(copy.deepcopy(attackers), copy.deepcopy(defenders))
+    a, d = simulate(copy.deepcopy(attackers), copy.deepcopy(defenders))
+    print a, d

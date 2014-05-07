@@ -3,8 +3,6 @@
 import argparse
 import copy
 import random
-import math
-import numpy as np
 from unit import *
 
 def get_configuration():
@@ -30,6 +28,7 @@ def attack(a, targets):
     # select target
     t = random.choice(targets)
 
+    # check if the shot bounces
     if a.attack > t.shield/100.0:
       # update shield and hull plating
       t.shield -= a.attack
@@ -39,20 +38,15 @@ def attack(a, targets):
 
     # if hull < 70% there's a chance of exploding
     if t.hull < t.init_hull*0.7:
-      p = 1.0 - (t.hull / float(t.init_hull))
-      if random.random() < p:
+      if random.random() > t.hull / float(t.init_hull):
         t.hull = 0.0
 
     # perform rapid fire
-    if a.rfto.has_key(t.shortname):
-      r = float(a.rfto[t.shortname])
-      p = (r - 1.0) / r
-      if random.random() < p:
-        attack(a, targets)
+    if random.random() < a.rapidfire(t):
+      attack(a, targets)
 
 
 def simulate(attackers, defenders):
-  #print "%d: %d, %d" % (0, len(attackers), len(defenders))
   for r in range(6):
     for a in attackers:
       a.restore_shield()
@@ -65,7 +59,6 @@ def simulate(attackers, defenders):
     attackers = filter(lambda x: x.hull > 0.0, attackers)
     defenders = filter(lambda x: x.hull > 0.0, defenders)
 
-    #print "%d: %d, %d" % (r+1, len(attackers), len(defenders))
     if len(attackers) == 0 or len(defenders) == 0:
       break
 
@@ -80,17 +73,17 @@ if __name__ == "__main__":
 
   w, s, h = map(int, config.combat_attacker)
   for ut in config.unit_attacker:
-    unit = copy.deepcopy(UNITS[ut[0]])
+    unit = copy.copy(UNITS[ut[0]])
     unit.setcombat(w, s, h)
     for u in range(int(ut[1])):
-      attackers.append(copy.deepcopy(unit))
+      attackers.append(copy.copy(unit))
 
   w, s, h = map(int, config.combat_defender)
   for ut in config.unit_defender:
-    unit = copy.deepcopy(UNITS[ut[0]])
+    unit = copy.copy(UNITS[ut[0]])
     unit.setcombat(w, s, h)
     for u in range(int(ut[1])):
-      defenders.append(copy.deepcopy(unit))
+      defenders.append(copy.copy(unit))
 
   for i in range(config.iterations):
     for u in attackers:

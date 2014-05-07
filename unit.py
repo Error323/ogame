@@ -80,7 +80,7 @@ UNITS = {
 
   'rl':Unit('Rocket Launcher',   'rl', (2.0e3, 0.0e0, 0.0e0), (8.0e1, 2.0e1)),
   'll':Unit('Light Laser',       'll', (1.5e3, 5.0e2, 0.0e0), (1.0e2, 2.5e1)),
-  'hl':Unit('Heavy Laser',       'hl', (6.0e3, 2.0e3, 0.0e0), (8.0e3, 1.0e2)),
+  'hl':Unit('Heavy Laser',       'hl', (6.0e3, 2.0e3, 0.0e0), (2.5e2, 1.0e2)),
   'ic':Unit('Ion Cannon',        'ic', (2.0e3, 6.0e3, 0.0e0), (1.5e2, 5.0e2)),
   'gc':Unit('Gauss Cannon',      'gc', (2.0e4, 1.5e4, 2.0e3), (1.1e3, 2.0e2)),
   'pt':Unit('Plasma Turret',     'pt', (5.0e4, 5.0e4, 3.0e4), (3.0e3, 3.0e2)),

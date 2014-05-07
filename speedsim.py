@@ -30,8 +30,7 @@ def get_configuration():
 def attack(a, D, W):
   t = random.randint(0, len(D)-1)
   W[t] += (a.attack > D[t].shield / 100.0) * a.attack
-  r = a.rapidfire(D[t])
-  if (random.random() < r):
+  if (random.random() < a.rapidfire(D[t])):
     attack(a, D, W)
 
 
@@ -42,7 +41,7 @@ def init_defense(D):
     S.append(d.shield)
     H.append(d.hull)
 
-  return np.array(H), np.array(S)
+  return np.array(S), np.array(H)
 
 
 def init_attack(A, D):
@@ -58,10 +57,11 @@ def battle(W, S, H, Hi):
   S -= W
   I = S < 0.0
   H[I] += S[I]
+  S[I] = 0.0
   H[H<0.0] = 0.0
-  P = H / Hi
-  I = P < 0.7
-  H[I] = (np.random.random(len(P[I])) >= P[I]) * H[I]
+  I = H < Hi*0.7
+  P = 1.0 - H[I] / Hi[I]
+  H[I] = (np.random.random(len(P)) < P) * H[I]
 
 
 def update(S, H, Hi, D):
@@ -78,18 +78,21 @@ def simulate(A, D):
   aHi = aH.copy()
   dS, dH = init_defense(A)
   dHi = dH.copy()
-
-  print "%d: %d %d" % (0, len(A), len(D))
+  #print "%d: %d %d" % (0, len(A), len(D))
   for i in range(6):
+    aSi = aS.copy()
+    dSi = dS.copy()
     aW = init_attack(A, D)
     dW = init_attack(D, A)
     battle(aW, aS, aH, aHi)
     battle(dW, dS, dH, dHi)
-    aS, aH, aHi, D = update(aS, aH, aHi, D)
-    dS, dH, dHi, A = update(dS, dH, dHi, A)
+    aS, aH, aHi, D = update(aSi, aH, aHi, D)
+    dS, dH, dHi, A = update(dSi, dH, dHi, A)
+    #print "%d: %d %d" % (i+1, len(A), len(D))
     if len(A) == 0 or len(D) == 0:
       break
-    print "%d: %d %d" % (i+1, len(A), len(D))
+
+  return len(A), len(D)
 
 
 if __name__ == "__main__":
@@ -111,4 +114,4 @@ if __name__ == "__main__":
     defenders += [unit] * num
 
   for i in range(config.iterations):
-    simulate(copy.deepcopy(attackers), copy.deepcopy(defenders))
+    print simulate(copy.deepcopy(attackers), copy.deepcopy(defenders))

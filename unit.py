@@ -32,7 +32,7 @@ class Unit:
       r = self.rfto[t.shortname]
       return (r - 1.0) / r
     else:
-      return 0
+      return 0.0
 
   def __repr__(self):
     return self.shortname

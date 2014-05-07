@@ -3,6 +3,7 @@
 import argparse
 import copy
 import random
+import numpy as np
 from unit import *
 
 def get_configuration():
@@ -37,8 +38,9 @@ def attack(a, targets):
         t.shield = 0.0
 
     # if hull < 70% there's a chance of exploding
-    if t.hull < t.init_hull*0.7:
-      if random.random() > t.hull / float(t.init_hull):
+    p = t.hull / t.init_hull
+    if p < 0.7:
+      if random.random() < 1.0 - p:
         t.hull = 0.0
 
     # perform rapid fire
@@ -85,10 +87,15 @@ if __name__ == "__main__":
     for u in range(int(ut[1])):
       defenders.append(copy.copy(unit))
 
+  res_a = np.array([0.0] * config.iterations)
+  res_d = np.array([0.0] * config.iterations)
   for i in range(config.iterations):
     for u in attackers:
       u.restore_all()
     for u in defenders:
       u.restore_all()
     a, d = simulate(attackers, defenders)
-    print len(a), len(d)
+    res_a[i] = len(a)
+    res_d[i] = len(d)
+
+  print "%0.3f %0.3f %0.3f %0.3f" % (res_a.mean(), res_a.std(), res_d.mean(), res_d.std())

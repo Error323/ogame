@@ -51,18 +51,15 @@ def attack(a, targets):
         attack(a, targets)
 
 
-def restore(attacker):
-  attacker.shield = attacker.init_shield
-
 def simulate(attackers, defenders):
   #print "%d: %d, %d" % (0, len(attackers), len(defenders))
   for r in range(6):
     for a in attackers:
-      restore(a)
+      a.restore_shield()
       attack(a, defenders)
 
     for d in defenders:
-      restore(d)
+      d.restore_shield()
       attack(d, attackers)
 
     attackers = filter(lambda x: x.hull > 0.0, attackers)
@@ -72,7 +69,7 @@ def simulate(attackers, defenders):
     if len(attackers) == 0 or len(defenders) == 0:
       break
 
-  return len(attackers), len(defenders)
+  return attackers, defenders
 
 
 if __name__ == "__main__":
@@ -96,5 +93,9 @@ if __name__ == "__main__":
       defenders.append(copy.deepcopy(unit))
 
   for i in range(config.iterations):
-    a, d = simulate(copy.deepcopy(attackers), copy.deepcopy(defenders))
-    print a, d
+    for u in attackers:
+      u.restore_all()
+    for u in defenders:
+      u.restore_all()
+    a, d = simulate(attackers, defenders)
+    print len(a), len(d)

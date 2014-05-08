@@ -27,7 +27,10 @@ def get_configuration():
 
   return parser.parse_args()
 
+
 def attack(a, targets):
+  p = 1.0
+  while random.random() < p:
     # select target
     t = random.choice(targets)
 
@@ -45,8 +48,7 @@ def attack(a, targets):
         t.hull = 0.0
 
     # perform rapid fire
-    if random.random() < a.rapidfire(t):
-      attack(a, targets)
+    p = a.rapidfire(t)
 
 
 def simulate(attackers, defenders):
@@ -96,18 +98,20 @@ if __name__ == "__main__":
 
   w, s, h = map(int, config.combat_attacker)
   for ut in config.unit_attacker:
-    unit = copy.copy(UNITS[ut[0]])
+    unit, num = copy.copy(UNITS[ut[0]]), int(ut[1])
     unit.setcombat(w, s, h)
     A[unit.shortname] = [0.0] * config.iterations
-    for u in range(int(ut[1])):
+    print unit.shortname, num
+    for u in range(num):
       attackers.append(copy.copy(unit))
 
   w, s, h = map(int, config.combat_defender)
   for ut in config.unit_defender:
-    unit = copy.copy(UNITS[ut[0]])
+    unit, num = copy.copy(UNITS[ut[0]]), int(ut[1])
     unit.setcombat(w, s, h)
     D[unit.shortname] = [0.0] * config.iterations
-    for u in range(int(ut[1])):
+    print unit.shortname, num
+    for u in range(num):
       defenders.append(copy.copy(unit))
   
   for i in range(config.iterations):

@@ -11,6 +11,7 @@ class Unit:
     self.metal, self.crystal, self.deuterium = cost
     self.attack, self.shield = combat
     self.init_shield = self.shield
+    self.shield_unit = self.shield / 100.0
     self.hull = (self.metal + self.crystal) / 10.0
     self.init_hull = self.hull
     self.rfto = {}
@@ -26,6 +27,7 @@ class Unit:
     self.attack = self.attack * (1.0 + 0.1*w)
     self.shield = self.shield * (1.0 + 0.1*s)
     self.init_shield = self.shield
+    self.shield_unit = self.shield / 100.0
 
   def restore_shield(self):
     self.shield = self.init_shield

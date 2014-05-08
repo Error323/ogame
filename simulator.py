@@ -98,7 +98,7 @@ if __name__ == "__main__":
   for ut in config.unit_attacker:
     unit = copy.copy(UNITS[ut[0]])
     unit.setcombat(w, s, h)
-    A[unit.shortname] = []
+    A[unit.shortname] = [0.0] * config.iterations
     for u in range(int(ut[1])):
       attackers.append(copy.copy(unit))
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
   for ut in config.unit_defender:
     unit = copy.copy(UNITS[ut[0]])
     unit.setcombat(w, s, h)
-    D[unit.shortname] = []
+    D[unit.shortname] = [0.0] * config.iterations
     for u in range(int(ut[1])):
       defenders.append(copy.copy(unit))
   
@@ -116,18 +116,9 @@ if __name__ == "__main__":
     for u in defenders:
       u.restore_all()
     a, d = simulate(attackers, defenders)
-    ta, td = {}, {}
     for u in a:
-      if not ta.has_key(u.shortname):
-        ta[u.shortname] = 0
-      ta[u.shortname] += 1
+      A[u.shortname][i] += 1.0
     for u in d:
-      if not td.has_key(u.shortname):
-        td[u.shortname] = 0
-      td[u.shortname] += 1
-    for k, v in ta.iteritems():
-      A[k].append(v)
-    for k, v in td.iteritems():
-      D[k].append(v)
+      D[u.shortname][i] += 1.0
 
   report([A, D])

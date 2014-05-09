@@ -29,10 +29,16 @@ def get_configuration():
 
 
 def attack(a, targets):
-  p = 1.0
-  while random.random() < p:
+  r = 1.0
+  while random.random() < r:
     # select target
     t = random.choice(targets)
+
+    # perform rapid fire
+    r = a.rapidfire(t)
+
+    if t.hull <= 0.0:
+      continue
 
     # update shield and hull plating
     if (a.attack > t.shield):
@@ -47,8 +53,6 @@ def attack(a, targets):
       if random.random() < 1.0 - p:
         t.hull = 0.0
 
-    # perform rapid fire
-    p = a.rapidfire(t)
 
 
 def simulate(attackers, defenders):
@@ -101,19 +105,17 @@ if __name__ == "__main__":
     unit, num = copy.copy(UNITS[ut[0]]), int(ut[1])
     unit.setcombat(w, s, h)
     A[unit.shortname] = [0.0] * config.iterations
-    print unit.shortname, num
-    for u in range(num):
-      attackers.append(copy.copy(unit))
+    attackers += [copy.copy(unit) for i in range(num)]
 
   w, s, h = map(int, config.combat_defender)
   for ut in config.unit_defender:
     unit, num = copy.copy(UNITS[ut[0]]), int(ut[1])
     unit.setcombat(w, s, h)
     D[unit.shortname] = [0.0] * config.iterations
-    print unit.shortname, num
-    for u in range(num):
-      defenders.append(copy.copy(unit))
+    defenders += [copy.copy(unit) for i in range(num)]
   
+  #random.shuffle(defenders)
+  #random.shuffle(attackers)
   for i in range(config.iterations):
     for u in attackers:
       u.restore_all()
